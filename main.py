@@ -37,12 +37,12 @@ class Batch:
         if order_line in self._allocated_order_lines:
             self._allocated_order_lines.remove(order_line)
 
-    def __gt__(self, other: Batch):
+    def __lt__(self, other: Batch):
         if self.eta is None:
-            return False
-        if other.eta is None:
             return True
-        return self.eta > other.eta
+        if other.eta is None:
+            return False
+        return self.eta < other.eta
 
 
 class OutOfStockError(Exception):
