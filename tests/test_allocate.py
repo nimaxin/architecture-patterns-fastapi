@@ -1,61 +1,10 @@
-from dataclasses import dataclass
 from datetime import datetime
 
 import pytest
 
-
-@dataclass(frozen=True)
-class OrderLine:
-    sku: str
-    quantity: int
-
-
-class Batch:
-    def __init__(self, id: int, sku: str, quantity: int, eta: datetime | None = None):
-        self.id = id
-        self.sku = sku
-        self.quantity = quantity
-        self.eta = eta
-        self._allocated_order_lines: set[OrderLine] = set()
-
-    @property
-    def available_quantity(self) -> int:
-        return self.quantity - sum(
-            order_lines.quantity for order_lines in self._allocated_order_lines
-        )
-
-    def allocate(self, order_line: OrderLine):
-        self._allocated_order_lines.add(order_line)
-
-    def can_allocate(self, order_line: OrderLine) -> bool:
-        return (
-            self.sku == order_line.sku
-            and self.available_quantity >= order_line.quantity
-        )
-
-    def deallocate(self, order_line: OrderLine):
-        if order_line in self._allocated_order_lines:
-            self._allocated_order_lines.remove(order_line)
-
-    def __lt__(self, other: Batch):
-        if self.eta is None:
-            return True
-        if other.eta is None:
-            return False
-        return self.eta < other.eta
-
-
-class OutOfStockError(Exception):
-    pass
-
-
-def allocate(order_line: OrderLine, batches: list[Batch]) -> int:
-    try:
-        batch = next(b for b in sorted(batches) if b.can_allocate(order_line))
-        batch.allocate(order_line)
-        return batch.id
-    except StopIteration:
-        raise OutOfStockError()
+from app.allocate.errors import OutOfStockError
+from app.allocate.model import Batch, OrderLine
+from app.allocate.services import allocate
 
 
 def test_allocating_to_a_batch_reduces_the_available_quantity():
