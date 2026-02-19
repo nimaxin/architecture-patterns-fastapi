@@ -12,7 +12,13 @@ order_line = Table(
     Column("id", Integer, primary_key=True, autoincrement=True),
     Column("sku", String),
     Column("quantity", Integer, nullable=False),
-    Column("order_id", Integer),
+    Column("order_id", String, nullable=False),
+    Column(
+        "batch_id",
+        Integer,
+        ForeignKey("batch.id", ondelete="SET NULL"),
+        nullable=True,
+    ),
 )
 
 batch = Table(
@@ -25,34 +31,11 @@ batch = Table(
     Column("eta", DateTime(timezone=True), nullable=True),
 )
 
-batch_allocation = Table(
-    "batch_allocation",
-    metadata,
-    Column(
-        "batch_id",
-        Integer,
-        ForeignKey("batch.id", ondelete="CASCADE"),
-        primary_key=True,
-    ),
-    Column(
-        "order_line_id",
-        Integer,
-        ForeignKey("order_line.id", ondelete="CASCADE"),
-        primary_key=True,
-    ),
-)
-
 
 def start_mappers():
     mapper_registry.map_imperatively(OrderLine, order_line)
     mapper_registry.map_imperatively(
         Batch,
         batch,
-        properties={
-            "_allocations": relationship(
-                OrderLine,
-                secondary=batch_allocation,
-                collection_class=set,
-            )
-        },
+        properties={"_allocations": relationship(OrderLine, collection_class=set)},
     )
