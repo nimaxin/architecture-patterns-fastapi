@@ -1,0 +1,9 @@
+from typing import Protocol
+
+from .model import Batch
+
+
+class RepositoryProtocol(Protocol):
+    async def add(self, batch: Batch) -> Batch: ...
+    async def get(self, reference: str) -> Batch | None: ...
+    async def list(self) -> list[Batch]: ...
