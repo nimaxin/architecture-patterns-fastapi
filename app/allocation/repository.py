@@ -17,8 +17,8 @@ class SQLAlchemyRepository:
     async def get(self, reference: str) -> Batch | None:
         stmt = (
             select(Batch)
-            .where(Batch.reference == reference)  # type: ignore
-            .options(selectinload(Batch._allocations))  # type: ignore
+            .where(Batch.reference == reference)
+            .options(selectinload(Batch._allocations))
         )
         result = await self.session.execute(stmt)
         return result.scalar_one_or_none()

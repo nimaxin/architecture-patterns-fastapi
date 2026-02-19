@@ -1,23 +1,51 @@
-from dataclasses import dataclass
 from datetime import datetime
 
+from sqlalchemy import DateTime, ForeignKey
+from sqlalchemy.orm import (
+    DeclarativeBase,
+    Mapped,
+    MappedAsDataclass,
+    mapped_column,
+    relationship,
+)
 
-@dataclass(unsafe_hash=True)
-class OrderLine:
-    sku: str
-    quantity: int
-    order_id: str
+
+class BaseModel(MappedAsDataclass, DeclarativeBase):
+    pass
 
 
-class Batch:
-    def __init__(
-        self, reference: str, sku: str, quantity: int, eta: datetime | None = None
-    ):
-        self.reference = reference
-        self.sku = sku
-        self.quantity = quantity
-        self.eta = eta
-        self._allocations: set[OrderLine] = set()
+class OrderLine(BaseModel):
+    __tablename__ = "order_line"
+
+    id: Mapped[int] = mapped_column(init=False, primary_key=True)
+
+    sku: Mapped[str]
+    quantity: Mapped[int]
+    order_id: Mapped[str]
+
+    batch_id: Mapped[int | None] = mapped_column(
+        ForeignKey("batch.id", ondelete="SET NULL"), default=None
+    )
+
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, OrderLine):
+            return False
+        return self.order_id == other.order_id and self.sku == other.sku
+
+    def __hash__(self) -> int:
+        return hash((self.order_id, self.sku))
+
+
+class Batch(BaseModel):
+    __tablename__ = "batch"
+
+    id: Mapped[int] = mapped_column(init=False, primary_key=True)
+
+    reference: Mapped[str]
+    sku: Mapped[str]
+    quantity: Mapped[int]
+    eta: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), default=None)
+    _allocations: Mapped[set[OrderLine]] = relationship(default_factory=set)
 
     @property
     def available_quantity(self) -> int:
@@ -48,5 +76,4 @@ class Batch:
     def __eq__(self, value: object) -> bool:
         if not isinstance(value, Batch):
             return False
-
         return self.reference == value.reference
