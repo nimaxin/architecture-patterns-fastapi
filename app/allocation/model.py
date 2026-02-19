@@ -2,10 +2,11 @@ from dataclasses import dataclass
 from datetime import datetime
 
 
-@dataclass(frozen=True)
+@dataclass(unsafe_hash=True)
 class OrderLine:
     sku: str
     quantity: int
+    order_id: str
 
 
 class Batch:
