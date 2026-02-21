@@ -50,3 +50,6 @@ class Batch:
             return False
 
         return self.reference == value.reference
+
+    def __hash__(self) -> int:
+        return hash(self.reference)
