@@ -1,10 +1,11 @@
 from fastapi import FastAPI, HTTPException
 
-from . import usecases
+from app.allocation import services
+from app.allocation.adapters.repository import SQLAlchemyRepository
+from app.allocation.domain import OrderLine
+from app.allocation.domain.errors import OutOfStockError
+
 from .depends import get_session
-from .errors import OutOfStockError
-from .model import OrderLine
-from .repository import SQLAlchemyRepository
 from .schemas import AllocateRequest, AllocateResponse
 
 api = FastAPI()
@@ -17,7 +18,7 @@ async def allocate_order_line(data: AllocateRequest):
             sku=data.sku, quantity=data.quantity, order_id=data.order_id
         )
         try:
-            batch_ref = await usecases.allocate(
+            batch_ref = await services.allocate(
                 order_line, SQLAlchemyRepository(session), session
             )
         except OutOfStockError:

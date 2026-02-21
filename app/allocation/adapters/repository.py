@@ -1,8 +1,16 @@
+from typing import Protocol
+
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from .model import Batch
+from ..domain import Batch
+
+
+class RepositoryProtocol(Protocol):
+    async def add(self, batch: Batch) -> None: ...
+    async def get(self, reference: str) -> Batch | None: ...
+    async def list(self) -> list[Batch]: ...
 
 
 class SQLAlchemyRepository:

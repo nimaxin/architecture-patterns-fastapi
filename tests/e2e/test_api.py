@@ -3,7 +3,7 @@ from datetime import datetime
 
 from httpx import ASGITransport, AsyncClient
 
-from app.allocation.api import api
+from app.allocation.entrypoints.api.api import api
 
 client = AsyncClient(transport=ASGITransport(api), base_url="http://test")
 

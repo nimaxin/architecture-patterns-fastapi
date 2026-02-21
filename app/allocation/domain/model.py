@@ -1,6 +1,8 @@
 from dataclasses import dataclass
 from datetime import datetime
 
+from .errors import OutOfStockError
+
 
 @dataclass(unsafe_hash=True)
 class OrderLine:
@@ -53,3 +55,12 @@ class Batch:
 
     def __hash__(self) -> int:
         return hash(self.reference)
+
+
+def allocate(order_line: OrderLine, batches: list[Batch]) -> str:
+    try:
+        batch = next(b for b in sorted(batches) if b.can_allocate(order_line))
+        batch.allocate(order_line)
+        return batch.reference
+    except StopIteration:
+        raise OutOfStockError()

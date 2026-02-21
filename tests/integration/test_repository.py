@@ -3,8 +3,8 @@ from datetime import datetime
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.allocation.model import Batch, OrderLine
-from app.allocation.repository import SQLAlchemyRepository
+from app.allocation.adapters.repository import SQLAlchemyRepository
+from app.allocation.domain import Batch, OrderLine
 
 
 async def test_repository_can_save_a_batch(session: AsyncSession):

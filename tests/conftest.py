@@ -5,8 +5,8 @@ from dotenv import load_dotenv
 from sqlalchemy import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.allocation.model import Batch
-from app.allocation.orm import metadata, start_mappers
+from app.allocation.adapters.orm import metadata, start_mappers
+from app.allocation.domain import Batch
 
 load_dotenv(dotenv_path=".env.test")
 start_mappers()

@@ -1,9 +1,9 @@
 import pytest
 
-from app.allocation import usecases
-from app.allocation.errors import OutOfStockError
-from app.allocation.model import Batch, OrderLine
-from app.allocation.repository import FakeRepository
+from app.allocation import services
+from app.allocation.adapters.repository import FakeRepository
+from app.allocation.domain import Batch, OrderLine
+from app.allocation.domain.errors import OutOfStockError
 
 
 class FakeSession:
@@ -17,7 +17,7 @@ async def test_returns_allocation():
     repository = FakeRepository([batch])
     session = FakeSession()
 
-    batch_ref = await usecases.allocate(order_line, repository, session)  # type: ignore
+    batch_ref = await services.allocate(order_line, repository, session)  # type: ignore
     assert batch_ref == batch.reference
 
 
@@ -28,4 +28,4 @@ async def test_error_for_invalid_sku():
     session = FakeSession()
 
     with pytest.raises(OutOfStockError):
-        await usecases.allocate(order_line, repository, session)  # type: ignore
+        await services.allocate(order_line, repository, session)  # type: ignore

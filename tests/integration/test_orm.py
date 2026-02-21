@@ -1,7 +1,7 @@
 from sqlalchemy import insert, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.allocation.model import OrderLine
+from app.allocation.domain.model import OrderLine
 
 
 async def test_order_line_mapper_can_load_order_lines(session: AsyncSession):
