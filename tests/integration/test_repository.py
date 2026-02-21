@@ -3,17 +3,18 @@ from datetime import datetime
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.allocation.model import Batch, OrderLine
-from app.allocation.repository import SQLAlchemyRepository
+from app.allocation.adapters.repository import SQLAlchemyRepository
+from app.allocation.domain import Batch, OrderLine
 
 
 async def test_repository_can_save_a_batch(session: AsyncSession):
-    batch = Batch("batch-id", "chair", 15, datetime(2026, 1, 1))
+    batch_ref = "batch-id"
+    batch = Batch(batch_ref, "chair", 15, datetime(2026, 1, 1))
 
     repository = SQLAlchemyRepository(session)
     await repository.add(batch)
 
-    stmt = select(Batch)
+    stmt = select(Batch).where(Batch.reference == batch_ref)  # type: ignore
     result = await session.execute(stmt)
 
     assert batch == result.scalar_one_or_none()

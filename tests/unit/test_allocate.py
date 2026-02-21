@@ -2,9 +2,8 @@ from datetime import datetime
 
 import pytest
 
-from app.allocation.errors import OutOfStockError
-from app.allocation.model import Batch, OrderLine
-from app.allocation.services import allocate
+from app.allocation.domain import Batch, OrderLine, allocate
+from app.allocation.domain.errors import OutOfStockError
 
 
 def test_allocating_to_a_batch_reduces_the_available_quantity():
