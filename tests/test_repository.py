@@ -8,12 +8,13 @@ from app.allocation.repository import SQLAlchemyRepository
 
 
 async def test_repository_can_save_a_batch(session: AsyncSession):
-    batch = Batch("batch-id", "chair", 15, datetime(2026, 1, 1))
+    batch_ref = "batch-id"
+    batch = Batch(batch_ref, "chair", 15, datetime(2026, 1, 1))
 
     repository = SQLAlchemyRepository(session)
     await repository.add(batch)
 
-    stmt = select(Batch)
+    stmt = select(Batch).where(Batch.reference == batch_ref)  # type: ignore
     result = await session.execute(stmt)
 
     assert batch == result.scalar_one_or_none()
