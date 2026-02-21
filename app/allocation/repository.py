@@ -9,10 +9,9 @@ class SQLAlchemyRepository:
     def __init__(self, session: AsyncSession) -> None:
         self.session = session
 
-    async def add(self, batch: Batch) -> Batch:
+    async def add(self, batch: Batch) -> None:
         self.session.add(batch)
         await self.session.flush()
-        return batch
 
     async def get(self, reference: str) -> Batch | None:
         stmt = (
@@ -24,6 +23,22 @@ class SQLAlchemyRepository:
         return result.scalar_one_or_none()
 
     async def list(self) -> list[Batch]:
-        stmt = select(Batch)
+        stmt = select(Batch).options(selectinload(Batch._allocations))  # type: ignore
         result = await self.session.execute(stmt)
         return list(result.scalars())
+
+
+class FakeRepository:
+    def __init__(self, batches: list[Batch]) -> None:
+        self._batches = set(batches)
+
+    async def add(self, batch: Batch) -> None:
+        self._batches.add(batch)
+
+    async def get(self, reference: str) -> Batch | None:
+        return next(
+            (batch for batch in self._batches if batch.reference == reference), None
+        )
+
+    async def list(self) -> list[Batch]:
+        return list(self._batches)
